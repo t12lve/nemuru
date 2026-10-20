@@ -1,0 +1,63 @@
+[package]
+name = "nemuru"
+version = "1.1.0"
+edition = "2021"
+authors = ["Nemuru"]
+description = "Baisse le volume de Windows, puis met l'ordinateur en veille"
+readme = "README.md"
+license = "MIT"
+
+[dependencies]
+# Windows API for Volume control (Core Audio / WASAPI) & System Power State (Sleep/Hibernate)
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_Media_Audio",
+    "Win32_Media_Audio_Endpoints",
+    "Win32_System_Com",
+    "Win32_System_Power",
+    "Win32_System_Registry",
+    "Win32_System_SystemServices",
+    "Win32_System_Threading",
+    "Win32_UI_HiDpi",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Shell",
+    "Win32_Security",
+] }
+
+# Asynchronous runtime
+tokio = { version = "1.38", features = ["full"] }
+
+# Serialization for configuration & Cast protocol
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# mDNS discovery for Google TV / Chromecast on local network
+mdns-sd = "0.11"
+
+# TLS for Google Cast port 8009 connection
+native-tls = "0.2"
+
+# Fenêtre et barre des tâches
+eframe = "0.31"
+tray-icon = "0.19"
+
+# TLS Cast, au-dessus de native-tls
+tokio-native-tls = "0.3"
+
+# Utilities
+anyhow = "1.0"
+chrono = "0.4"
+log = "0.4"
+env_logger = "0.11"
+dirs = "5.0"
+
+[build-dependencies]
+# Embeds Windows application icon and manifest (dpiAware, admin/normal execution)
+winres = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
