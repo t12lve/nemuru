@@ -13,6 +13,7 @@ mod power;
 mod session;
 mod startup;
 mod ui;
+mod waves;
 
 use std::fs::OpenOptions;
 use std::io::{self, Write};

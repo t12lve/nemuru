@@ -78,6 +78,7 @@ struct SleepApp {
     searching: bool,
     discover_rx: Option<Receiver<Result<Vec<CastDevice>, String>>>,
     tray: Option<Tray>,
+    window_shown: bool,
 }
 
 impl SleepApp {
@@ -103,6 +104,7 @@ impl SleepApp {
             searching: false,
             discover_rx: None,
             tray,
+            window_shown: true,
         }
     }
 
@@ -209,6 +211,7 @@ impl SleepApp {
             }
         }
         if open {
+            self.window_shown = true;
             ctx.send_viewport_cmd(egui::ViewportCommand::Visible(true));
             ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
         }
@@ -517,6 +520,7 @@ impl eframe::App for SleepApp {
             if active && self.tray.is_some() {
                 ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
                 ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
+                self.window_shown = false;
             } else {
                 if !active {
                     self.persist();
@@ -525,20 +529,27 @@ impl eframe::App for SleepApp {
             }
         }
 
-        let delay = if active {
+        let shown = self.window_shown && !ctx.input(|input| input.viewport().minimized.unwrap_or(false));
+        let delay = if shown {
+            Duration::from_millis(66)
+        } else if active {
             Duration::from_millis(200)
         } else {
             Duration::from_secs(20)
         };
         ctx.request_repaint_after(delay);
 
-        let frame = egui::Frame::NONE
-            .inner_margin(egui::Margin::same(24))
-            .fill(PAPER);
+        let frame = egui::Frame::NONE.fill(PAPER);
         egui::CentralPanel::default().frame(frame).show(ctx, |ui| {
-            egui::ScrollArea::vertical()
-                .auto_shrink([false, false])
-                .show(ui, |ui| self.body(ui));
+            let time = ui.input(|input| input.time) as f32 * 0.35;
+            crate::waves::paint(ui.painter(), ui.max_rect(), time);
+            egui::Frame::NONE
+                .inner_margin(egui::Margin::same(24))
+                .show(ui, |ui| {
+                    egui::ScrollArea::vertical()
+                        .auto_shrink([false, false])
+                        .show(ui, |ui| self.body(ui));
+                });
         });
     }
 }
