@@ -7,6 +7,7 @@
 //! Fenêtre. Le temps restant est le seul élément grand.
 //! Le laiton n'apparaît que sur l'action principale.
 
+use crate::atv::{self, PairEvent, PairSession, PowerNotice};
 use crate::config::AppConfig;
 use crate::fade::FadeCurve;
 use crate::google_tv::{self, CastDevice};
@@ -63,6 +64,18 @@ struct Tray {
     tip: String,
 }
 
+#[derive(Clone, Copy)]
+enum TvJob {
+    On,
+    Off,
+    Learn,
+}
+
+struct TvReply {
+    mac: String,
+    notice: Option<Result<PowerNotice, String>>,
+}
+
 struct SleepApp {
     session: Session,
     display: egui::FontFamily,
@@ -72,7 +85,11 @@ struct SleepApp {
     action: SleepAction,
     tv_enabled: bool,
     ip: String,
+    mac: String,
+    learn_tried: bool,
     port: u16,
+    tv_job: Option<TvJob>,
+    tv_rx: Option<Receiver<TvReply>>,
     startup: bool,
     error: String,
     devices: Vec<CastDevice>,
@@ -83,6 +100,9 @@ struct SleepApp {
     update_rx: Option<Receiver<update::Ready>>,
     pending_update: Option<update::Ready>,
     update_note: String,
+    tv_paired: bool,
+    pairing: Option<PairSession>,
+    pair_code: String,
 }
 
 impl SleepApp {
@@ -101,7 +121,11 @@ impl SleepApp {
             action: config.sleep_action,
             tv_enabled: config.google_tv_enabled,
             ip: config.google_tv_ip,
+            mac: config.google_tv_mac,
+            learn_tried: false,
             port: config.google_tv_port,
+            tv_job: None,
+            tv_rx: None,
             startup: config.run_at_startup,
             error: String::new(),
             devices: Vec::new(),
@@ -116,6 +140,9 @@ impl SleepApp {
             },
             pending_update: None,
             update_note: String::new(),
+            tv_paired: atv::is_paired(),
+            pairing: None,
+            pair_code: String::new(),
         }
     }
 
@@ -139,6 +166,7 @@ impl SleepApp {
             google_tv_enabled: self.tv_enabled,
             google_tv_ip: self.ip.trim().to_string(),
             google_tv_port: self.port,
+            google_tv_mac: self.mac.clone(),
             late_fade_minutes: late,
             run_at_startup: self.startup,
         }
@@ -189,6 +217,94 @@ impl SleepApp {
                 self.searching = false;
             }
             _ => {}
+        }
+    }
+
+    fn begin_tv(&mut self, job: TvJob) {
+        if self.tv_rx.is_some() {
+            return;
+        }
+        let ip = self.ip.trim().to_string();
+        if ip.is_empty() {
+            self.error = "Indiquez l'adresse de la télé.".into();
+            return;
+        }
+        let mac = self.mac.clone();
+        let (tx, rx) = mpsc::channel();
+        self.tv_job = Some(job);
+        self.tv_rx = Some(rx);
+        self.error.clear();
+        std::thread::Builder::new()
+            .name("télé".into())
+            .spawn(move || {
+                let learned = atv::hardware_address(&ip).unwrap_or(mac.clone());
+                let notice = match job {
+                    TvJob::Learn => None,
+                    TvJob::Off => Some(atv::power_off(&ip).map(|()| PowerNotice::Sleeping).map_err(|err| err.to_string())),
+                    TvJob::On => Some(atv::power_on(&ip, &learned).map_err(|err| err.to_string())),
+                };
+                let _ = tx.send(TvReply { mac: learned, notice });
+            })
+            .ok();
+    }
+
+    fn poll_tv(&mut self) {
+        if self.tv_rx.is_none()
+            && !self.learn_tried
+            && self.mac.is_empty()
+            && self.ip.parse::<std::net::Ipv4Addr>().is_ok()
+        {
+            self.learn_tried = true;
+            self.begin_tv(TvJob::Learn);
+        }
+        let ready = self.tv_rx.as_ref().map(|rx| rx.try_recv());
+        let Some(ready) = ready else {
+            return;
+        };
+        match ready {
+            Ok(reply) => {
+                self.tv_rx = None;
+                self.tv_job = None;
+                if !reply.mac.is_empty() && reply.mac != self.mac {
+                    self.mac = reply.mac;
+                    self.persist();
+                }
+                if let Some(notice) = reply.notice {
+                    self.error = match notice {
+                        Ok(PowerNotice::Waking) => "La télé s'allume.".into(),
+                        Ok(PowerNotice::AlreadyOn) => "La télé est déjà allumée.".into(),
+                        Ok(PowerNotice::WakePacket) => "Signal de réveil envoyé.".into(),
+                        Ok(PowerNotice::Sleeping) => "La télé s'éteint.".into(),
+                        Err(err) => err,
+                    };
+                }
+            }
+            Err(TryRecvError::Disconnected) => {
+                self.tv_rx = None;
+                self.tv_job = None;
+            }
+            Err(TryRecvError::Empty) => {}
+        }
+    }
+
+    fn poll_pairing(&mut self) {
+        let Some(session) = &self.pairing else {
+            return;
+        };
+        let event = session.poll();
+        match event {
+            Some(PairEvent::WaitingForCode) => {}
+            Some(PairEvent::Paired) => {
+                self.pairing = None;
+                self.tv_paired = true;
+                self.pair_code.clear();
+                self.error.clear();
+            }
+            Some(PairEvent::Failed(err)) => {
+                self.pairing = None;
+                self.error = err;
+            }
+            None => {}
         }
     }
 
@@ -514,10 +630,12 @@ impl SleepApp {
             let response = ui.add(
                 egui::TextEdit::singleline(&mut self.ip)
                     .desired_width(f32::INFINITY)
-                    .hint_text("192.168.1.42"),
+                    .hint_text("adresse IP"),
             );
             if response.changed() {
                 self.error.clear();
+                self.mac.clear();
+                self.learn_tried = false;
             }
             ui.add_space(8.0);
             let search_label = if self.searching { "Recherche" } else { "Chercher" };
@@ -528,11 +646,78 @@ impl SleepApp {
                 ui.add_space(4.0);
                 let label = format!("{}   {}", device.name, device.ip);
                 if chip(ui, &label, self.ip == device.ip).clicked() {
+                    self.mac.clear();
+                    self.learn_tried = false;
                     self.ip = device.ip;
                     self.port = device.port;
                     self.persist();
                 }
             }
+            ui.add_space(8.0);
+            if self.tv_paired {
+                ui.label(egui::RichText::new("La télé est appairée.").size(16.0).color(INK_DIM));
+                ui.add_space(8.0);
+            }
+            let pair_label = if self.pairing.is_some() {
+                "Code affiché sur la télé"
+            } else if self.tv_paired {
+                "Appairer à nouveau"
+            } else {
+                "Appairer"
+            };
+            if self.pairing.is_none() && chip(ui, pair_label, false).clicked() {
+                match atv::start_pairing(&self.ip) {
+                    Ok(session) => {
+                        self.pairing = Some(session);
+                        self.pair_code.clear();
+                        self.error.clear();
+                    }
+                    Err(err) => self.error = err.to_string(),
+                }
+            }
+            if self.pairing.is_some() {
+                ui.add_space(8.0);
+                ui.label(
+                    egui::RichText::new("Le code à six caractères s'affiche sur la télé.")
+                        .size(16.0)
+                        .color(INK_DIM),
+                );
+                ui.add_space(8.0);
+                ui.horizontal(|ui| {
+                    ui.add(
+                        egui::TextEdit::singleline(&mut self.pair_code)
+                            .desired_width(120.0)
+                            .hint_text("A1B2C3")
+                            .char_limit(6),
+                    );
+                    if chip(ui, "Valider", false).clicked() {
+                        if let Some(session) = &self.pairing {
+                            session.submit(&self.pair_code);
+                        }
+                    }
+                });
+            }
+            ui.add_space(8.0);
+            ui.horizontal(|ui| {
+                let on_label = if matches!(self.tv_job, Some(TvJob::On)) {
+                    "Allumage"
+                } else {
+                    "Allumer"
+                };
+                if chip(ui, on_label, false).clicked() {
+                    self.begin_tv(TvJob::On);
+                }
+                if self.tv_paired {
+                    let off_label = if matches!(self.tv_job, Some(TvJob::Off)) {
+                        "Extinction"
+                    } else {
+                        "Éteindre"
+                    };
+                    if chip(ui, off_label, false).clicked() {
+                        self.begin_tv(TvJob::Off);
+                    }
+                }
+            });
         }
 
         ui.add_space(10.0);
@@ -556,6 +741,8 @@ impl SleepApp {
 impl eframe::App for SleepApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.poll_discover();
+        self.poll_pairing();
+        self.poll_tv();
         self.poll_update();
         self.poll_tray(ctx);
         self.sync_tray();

@@ -2,3 +2,7 @@
 /dist-installer
 **/*.log
 **/*.log.old
+config.json
+atv.p12
+atv-key.pem
+atv.ok

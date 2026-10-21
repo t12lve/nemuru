@@ -360,6 +360,9 @@ fn join_tv(handle: Option<JoinHandle<Result<(), String>>>) -> Option<String> {
 }
 
 fn run_tv(config: &AppConfig) -> anyhow::Result<()> {
+    if crate::atv::is_paired() {
+        return crate::atv::power_off(&config.google_tv_ip);
+    }
     let tv = GoogleTvController::new(config.google_tv_ip.clone(), config.google_tv_port);
     let runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()

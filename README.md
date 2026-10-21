@@ -2,7 +2,7 @@
 
 Nemuru baisse le volume de Windows, puis met l'ordinateur en veille. On choisit la durée, la façon dont le son descend, et ce qui se passe à la fin.
 
-Windows 10 ou 11, 64 bits. L'installeur est sur la [page des releases](https://github.com/t12lve/nemuru/releases/latest) : `Nemuru_Setup_v1.2.0.exe`.
+Windows 10 ou 11, 64 bits. L'installeur est sur la [page des releases](https://github.com/t12lve/nemuru/releases/latest) : `Nemuru_Setup_v1.3.0.exe`.
 
 Au lancement, Nemuru compare sa version à la dernière release du dépôt GitHub. Si une version plus récente existe, l'installeur est téléchargé puis lancé dès que aucun compte n'est en cours. La fenêtre se ferme, l'installation se fait, puis Nemuru se rouvre.
 
@@ -48,7 +48,7 @@ Nemuru agit sur le volume principal, celui du curseur de la barre des tâches. I
 
 L'extinction de la télé est décochée. Il faut une adresse sur le même réseau, ou **Chercher**, qui interroge le réseau en mDNS.
 
-La commande envoyée est `STANDBY` du protocole Cast, en TLS, sur le port 8009. Elle part environ trente secondes avant la fin du compte, pour que la télé ait le temps de s'éteindre avant que l'ordinateur coupe le réseau. Nemuru n'annonce que la télé a accepté que si une réponse revient. Si la télé ne répond pas, l'action choisie pour l'ordinateur a quand même lieu.
+Une Google TV refuse souvent l'ordre Cast `STANDBY`. **Appairer** affiche alors un code à six caractères sur la télé. Une fois ce code saisi, Nemuru envoie la touche d'alimentation de la télécommande Android, environ trente secondes avant la fin du compte. **Allumer** envoie la touche de réveil si la télé répond encore, sinon un signal de réveil sur le réseau local. L'adresse de la télé et son identité matérielle restent dans les réglages de cet ordinateur. Sans appairage, l'ordre Cast est tout de même essayé pour l'extinction. Si la télé ne répond pas, l'action choisie pour l'ordinateur a quand même lieu.
 
 ## Fichiers
 
@@ -78,7 +78,7 @@ ou, si le compilateur est déjà dans le chemin habituel :
 "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\installer.iss
 ```
 
-Le fichier produit est `dist-installer\Nemuru_Setup_v1.2.0.exe`.
+Le fichier produit est `dist-installer\Nemuru_Setup_v1.3.0.exe`.
 
 Les tests vérifient les courbes de volume. Ils ne touchent ni au son ni à la veille :
 

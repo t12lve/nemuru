@@ -16,6 +16,7 @@ pub struct AppConfig {
     pub google_tv_enabled: bool,
     pub google_tv_ip: String,
     pub google_tv_port: u16,
+    pub google_tv_mac: String,
     pub late_fade_minutes: u64,
     pub run_at_startup: bool,
 }
@@ -29,6 +30,7 @@ impl Default for AppConfig {
             google_tv_enabled: false,
             google_tv_ip: String::new(),
             google_tv_port: 8009,
+            google_tv_mac: String::new(),
             late_fade_minutes: 10,
             run_at_startup: false,
         }
@@ -85,8 +87,24 @@ impl AppConfig {
             copy.google_tv_port = 8009;
         }
         copy.google_tv_ip = copy.google_tv_ip.trim().to_string();
+        copy.google_tv_mac = normalize_mac(&copy.google_tv_mac);
         copy
     }
+}
+
+fn normalize_mac(text: &str) -> String {
+    let hex: String = text
+        .chars()
+        .filter(|c| c.is_ascii_hexdigit())
+        .map(|c| c.to_ascii_lowercase())
+        .collect();
+    if hex.len() != 12 || hex.chars().all(|c| c == '0') || hex.chars().all(|c| c == 'f') {
+        return String::new();
+    }
+    (0..6)
+        .map(|index| &hex[index * 2..index * 2 + 2])
+        .collect::<Vec<_>>()
+        .join(":")
 }
 
 fn legacy_config_path() -> PathBuf {
