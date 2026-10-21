@@ -1,6 +1,6 @@
 [package]
 name = "nemuru"
-version = "1.1.0"
+version = "1.2.0"
 edition = "2021"
 authors = ["Nemuru"]
 description = "Baisse le volume de Windows, puis met l'ordinateur en veille"
@@ -50,6 +50,7 @@ chrono = "0.4"
 log = "0.4"
 env_logger = "0.11"
 dirs = "5.0"
+ureq = "2.12"
 
 [build-dependencies]
 # Embeds Windows application icon and manifest (dpiAware, admin/normal execution)

@@ -13,6 +13,7 @@ use crate::google_tv::{self, CastDevice};
 use crate::mark;
 use crate::power::SleepAction;
 use crate::session::{Phase, Session};
+use crate::update;
 use chrono::{Local, Timelike};
 use eframe::egui;
 use std::sync::mpsc::{self, Receiver, TryRecvError};
@@ -79,6 +80,9 @@ struct SleepApp {
     discover_rx: Option<Receiver<Result<Vec<CastDevice>, String>>>,
     tray: Option<Tray>,
     window_shown: bool,
+    update_rx: Option<Receiver<update::Ready>>,
+    pending_update: Option<update::Ready>,
+    update_note: String,
 }
 
 impl SleepApp {
@@ -105,6 +109,13 @@ impl SleepApp {
             discover_rx: None,
             tray,
             window_shown: true,
+            update_rx: if cfg!(debug_assertions) {
+                None
+            } else {
+                Some(update::check_in_background())
+            },
+            pending_update: None,
+            update_note: String::new(),
         }
     }
 
@@ -179,6 +190,39 @@ impl SleepApp {
             }
             _ => {}
         }
+    }
+
+    fn poll_update(&mut self) {
+        if let Some(rx) = &self.update_rx {
+            match rx.try_recv() {
+                Ok(ready) => {
+                    self.pending_update = Some(ready);
+                    self.update_rx = None;
+                }
+                Err(TryRecvError::Disconnected) => self.update_rx = None,
+                Err(TryRecvError::Empty) => {}
+            }
+        }
+        let Some(ready) = self.pending_update.take() else {
+            return;
+        };
+        if self.session.view().phase != Phase::Idle {
+            self.pending_update = Some(ready);
+            return;
+        }
+        if self.update_note.is_empty() {
+            self.update_note = format!("Mise à jour {}.", ready.version);
+            self.pending_update = Some(ready);
+            return;
+        }
+        self.persist();
+        self.session.shutdown();
+        if let Err(err) = update::install(&ready) {
+            self.update_note.clear();
+            self.error = format!("Mise à jour impossible ({err}).");
+            return;
+        }
+        std::process::exit(0);
     }
 
     fn poll_tray(&mut self, ctx: &egui::Context) {
@@ -337,6 +381,10 @@ impl SleepApp {
         if !self.error.is_empty() && !active {
             ui.add_space(8.0);
             ui.label(egui::RichText::new(&self.error).size(16.0).color(INK));
+        }
+        if !self.update_note.is_empty() && !active {
+            ui.add_space(8.0);
+            ui.label(egui::RichText::new(&self.update_note).size(16.0).color(INK_DIM));
         }
 
         if !active {
@@ -508,6 +556,7 @@ impl SleepApp {
 impl eframe::App for SleepApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.poll_discover();
+        self.poll_update();
         self.poll_tray(ctx);
         self.sync_tray();
 

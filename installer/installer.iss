@@ -2,7 +2,7 @@
 ; Les chemins sont relatifs à ce fichier (dossier installer/).
 
 #define MyAppName "Nemuru"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "Nemuru"
 #define MyAppExeName "nemuru.exe"
 

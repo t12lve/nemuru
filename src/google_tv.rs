@@ -11,7 +11,12 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 
 const CAST_CONNECTION: &str = "urn:x-cast:com.google.cast.tp.connection";
+const CAST_HEARTBEAT: &str = "urn:x-cast:com.google.cast.tp.heartbeat";
 const CAST_RECEIVER: &str = "urn:x-cast:com.google.cast.receiver";
+
+/// La commande part avant la fin du compte, le temps que la télé s'éteigne
+/// avant que l'ordinateur coupe le réseau en s'endormant.
+pub const LEAD: Duration = Duration::from_secs(30);
 
 #[derive(Debug, Clone)]
 pub struct CastDevice {
@@ -62,6 +67,8 @@ impl GoogleTvController {
             r#"{"type":"CONNECT","origin":{}}"#,
         )
         .await?;
+        write_cast(&mut tls, CAST_HEARTBEAT, r#"{"type":"PING"}"#).await?;
+        let _ = read_some(&mut tls, Duration::from_millis(600)).await;
         write_cast(
             &mut tls,
             CAST_RECEIVER,
@@ -69,11 +76,20 @@ impl GoogleTvController {
         )
         .await?;
 
-        let mut buf = [0u8; 2048];
-        match tokio::time::timeout(Duration::from_millis(1800), tls.read(&mut buf)).await {
-            Ok(Ok(n)) if n > 0 => Ok(()),
-            _ => Err(anyhow!("pas de confirmation")),
+        if !read_some(&mut tls, Duration::from_secs(4)).await {
+            return Err(anyhow!("pas de confirmation"));
         }
+        // Laisser la télé appliquer l'extinction avant de fermer la connexion.
+        tokio::time::sleep(Duration::from_secs(3)).await;
+        Ok(())
+    }
+}
+
+async fn read_some(stream: &mut tokio_native_tls::TlsStream<TcpStream>, wait: Duration) -> bool {
+    let mut buf = [0u8; 2048];
+    match tokio::time::timeout(wait, stream.read(&mut buf)).await {
+        Ok(Ok(n)) if n > 0 => true,
+        _ => false,
     }
 }
 

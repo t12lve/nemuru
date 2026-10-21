@@ -13,6 +13,7 @@ mod power;
 mod session;
 mod startup;
 mod ui;
+mod update;
 mod waves;
 
 use std::fs::OpenOptions;
@@ -24,7 +25,7 @@ fn main() {
         return;
     }
     init_log();
-    log::info!("Nemuru 1.1.0");
+    log::info!("Nemuru {}", env!("CARGO_PKG_VERSION"));
     startup::migrate_legacy();
     if let Err(err) = ui::run() {
         log::error!("fenêtre : {err}");

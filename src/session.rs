@@ -183,7 +183,7 @@ fn worker(
     }
 
     power::keep_awake(true);
-    let outcome = countdown(
+    let (outcome, tv_note) = countdown(
         &config,
         audio.as_ref(),
         saved,
@@ -199,28 +199,21 @@ fn worker(
             if let (Some(audio), Some(saved)) = (audio.as_ref(), saved) {
                 let _ = audio.restore(saved);
             }
-            finish_idle(
-                &shared,
-                if saved.is_some() {
-                    "Annulé. Le volume est rétabli."
-                } else {
-                    "Annulé."
-                },
-            );
+            let mut text = String::from(if saved.is_some() {
+                "Annulé. Le volume est rétabli."
+            } else {
+                "Annulé."
+            });
+            if let Some(note) = tv_note {
+                text.push_str(&note);
+            }
+            finish_idle(&shared, &text);
         }
         Outcome::Finished => {
             if let Some(audio) = audio.as_ref() {
                 let _ = audio.set_volume(0.0);
             }
-            let tv_note = if config.google_tv_enabled {
-                set_phase(&shared, Phase::Finishing, "Extinction de la télé.");
-                match run_tv(&config) {
-                    Ok(()) => " La télé a accepté l'extinction.",
-                    Err(_) => " La télé n'a pas répondu.",
-                }
-            } else {
-                ""
-            };
+            let tv_note = tv_note.unwrap_or_default();
             if cancel.load(Ordering::SeqCst) {
                 if let (Some(audio), Some(saved)) = (audio.as_ref(), saved) {
                     let _ = audio.restore(saved);
@@ -230,7 +223,7 @@ fn worker(
                 } else {
                     "Annulé."
                 });
-                text.push_str(tv_note);
+                text.push_str(&tv_note);
                 finish_idle(&shared, &text);
                 return;
             }
@@ -260,7 +253,7 @@ fn worker(
                         }
                         Err(err) => format!("L'écran n'a pas pu s'éteindre ({err})."),
                     };
-                    notice.push_str(tv_note);
+                    notice.push_str(&tv_note);
                     let mut shared = lock(&shared);
                     shared.saved = saved;
                     shared.view.phase = Phase::Muted;
@@ -273,7 +266,10 @@ fn worker(
                         if let (Some(audio), Some(saved)) = (audio.as_ref(), saved) {
                             let _ = audio.restore(saved);
                         }
-                        finish_idle(&shared, &format!("L'arrêt a échoué ({err}). Le volume est rétabli."));
+                        finish_idle(
+                            &shared,
+                            &format!("L'arrêt a échoué ({err}). Le volume est rétabli.{tv_note}"),
+                        );
                     }
                 }
                 SleepAction::Sleep | SleepAction::Hibernate => {
@@ -296,7 +292,7 @@ fn worker(
                             }
                         }
                     };
-                    text.push_str(tv_note);
+                    text.push_str(&tv_note);
                     finish_idle(&shared, &text);
                 }
             }
@@ -316,18 +312,30 @@ fn countdown(
     total: Duration,
     late: f32,
     cancel: &AtomicBool,
-    shared: &Mutex<Shared>,
-) -> Outcome {
+    shared: &Arc<Mutex<Shared>>,
+) -> (Outcome, Option<String>) {
     let started = Instant::now();
     let initial = saved.map(|s| s.volume).unwrap_or(1.0);
+    let mut tv: Option<JoinHandle<Result<(), String>>> = None;
     loop {
         if cancel.load(Ordering::SeqCst) {
-            return Outcome::Cancelled;
+            return (Outcome::Cancelled, join_tv(tv));
         }
         let elapsed = started.elapsed();
+        let remaining = total.saturating_sub(elapsed);
+        if config.google_tv_enabled && tv.is_none() && remaining <= crate::google_tv::LEAD {
+            set_notice(shared, "Extinction de la télé.");
+            let config = config.clone();
+            if let Ok(handle) = std::thread::Builder::new()
+                .name("google-tv".into())
+                .spawn(move || run_tv(&config).map_err(|err| err.to_string()))
+            {
+                tv = Some(handle);
+            }
+        }
         if elapsed >= total {
             publish(shared, Duration::ZERO, total, Some(0));
-            return Outcome::Finished;
+            return (Outcome::Finished, join_tv(tv));
         }
         let progress = elapsed.as_secs_f32() / total.as_secs_f32();
         let target = initial * fade::volume_factor(progress, config.fade_curve, late);
@@ -342,6 +350,13 @@ fn countdown(
         publish(shared, total.saturating_sub(elapsed), total, percent);
         std::thread::sleep(Duration::from_millis(250));
     }
+}
+
+fn join_tv(handle: Option<JoinHandle<Result<(), String>>>) -> Option<String> {
+    handle.map(|handle| match handle.join() {
+        Ok(Ok(())) => " La télé a accepté l'extinction.".into(),
+        _ => " La télé n'a pas répondu.".into(),
+    })
 }
 
 fn run_tv(config: &AppConfig) -> anyhow::Result<()> {
