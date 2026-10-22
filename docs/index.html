@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nemuru</title>
+<meta name="description" content="Nemuru baisse le volume de Windows en douceur, puis met l'ordinateur en veille. Et éteint la Google TV.">
+<meta property="og:title" content="Nemuru">
+<meta property="og:description" content="Le son baisse, puis l'ordinateur s'endort.">
+<meta property="og:image" content="https://t12lve.github.io/nemuru/logonemuru.png">
+<meta name="theme-color" content="#161412">
+<link rel="icon" href="logonemuru.png">
+<style>
+  :root {
+    --paper: #161412;
+    --surface: #36302a;
+    --surface-hi: #484038;
+    --ink: #ece6dc;
+    --ink-dim: #b0a698;
+    --brass: #c49a5c;
+    --on-brass: #161412;
+    --dusk: #c48e66;
+    --sun: #d6a86e;
+    --glow: #d09680;
+    --dot: rgba(214, 186, 148, 0.16);
+    --measure: 64rem;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--paper); color-scheme: dark; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 17px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Trame de points, comme le fond de la fenêtre : dense au centre, effacée sur les bords. */
+  .silk {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-image: radial-gradient(circle, var(--dot) 1.6px, transparent 2px);
+    background-size: 9px 9px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 60% 30%, #000 10%, transparent 75%);
+            mask-image: radial-gradient(ellipse 70% 60% at 60% 30%, #000 10%, transparent 75%);
+    animation: drift 40s linear infinite;
+  }
+  @keyframes drift { to { background-position: 90px 36px; } }
+  @media (prefers-reduced-motion: reduce) { .silk { animation: none; } }
+
+  a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--ink-dim); }
+  a:hover { text-decoration-color: var(--brass); }
+  :focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+
+  .wrap { max-width: var(--measure); margin: 0 auto; padding: 0 24px; }
+
+  header.hero { padding: 72px 0 48px; }
+  .hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: center; }
+  .logo { width: min(100%, 520px); height: auto; display: block; margin-left: -10px; }
+  .tagline {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(30px, 4.4vw, 46px);
+    line-height: 1.15;
+    margin: 28px 0 16px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .lede { color: var(--ink-dim); font-size: 19px; max-width: 34rem; margin: 0 0 32px; }
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .button {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 52px; padding: 0 28px;
+    text-decoration: none; font-size: 17px;
+    transition: filter 160ms ease, background-color 160ms ease, transform 120ms ease;
+  }
+  .button:active { transform: translateY(1px); }
+  .primary {
+    color: var(--on-brass);
+    background: linear-gradient(90deg, var(--dusk), var(--sun) 50%, var(--glow));
+  }
+  .primary:hover { filter: brightness(1.06); }
+  .secondary { color: var(--ink); background: var(--surface); }
+  .secondary:hover { background: var(--surface-hi); }
+  .fine { color: var(--ink-dim); font-size: 14px; margin-top: 14px; }
+
+  .shot { display: block; width: 100%; max-width: 400px; height: auto; margin-left: auto;
+          box-shadow: 0 30px 80px rgba(0,0,0,0.55); }
+
+  section { padding: 56px 0; }
+  .eyebrow { color: var(--ink-dim); font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 12px; }
+  h2 {
+    font-family: Georgia, "Times New Roman", serif; font-weight: 400;
+    font-size: clamp(26px, 3.2vw, 34px); line-height: 1.2; margin: 0 0 20px;
+  }
+  h3 { font-size: 18px; font-weight: 600; margin: 0 0 6px; }
+  p { margin: 0 0 14px; }
+  .dim { color: var(--ink-dim); }
+
+  .progress { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 48px; align-items: center; }
+  .progress img { width: 100%; max-width: 416px; height: auto; display: block; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: transparent; }
+  .cell { background: rgba(54, 48, 42, 0.55); padding: 26px 24px; }
+  .cell p { color: var(--ink-dim); margin: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 0; }
+  th, td { text-align: left; padding: 12px 16px 12px 0; vertical-align: top; border-top: 1px solid var(--surface); }
+  th { font-weight: 600; white-space: nowrap; width: 11rem; }
+  td { color: var(--ink-dim); }
+
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+  .tv img { width: 100%; max-width: 360px; height: auto; display: block; box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+
+  kbd {
+    font: 14px/1 "Segoe UI", system-ui, sans-serif; color: var(--ink);
+    background: var(--surface); padding: 4px 8px; border-bottom: 2px solid var(--surface-hi);
+  }
+  .steps { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+  .steps li { counter-increment: step; position: relative; padding: 0 0 18px 52px; }
+  .steps li::before {
+    content: counter(step); position: absolute; left: 0; top: -2px;
+    font-family: Georgia, serif; font-size: 30px; color: var(--sun); line-height: 1;
+  }
+
+  footer { padding: 48px 0 64px; color: var(--ink-dim); font-size: 15px; border-top: 1px solid var(--surface); margin-top: 24px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  @media (max-width: 820px) {
+    header.hero { padding: 40px 0 24px; }
+    .hero-grid, .progress, .duo { grid-template-columns: 1fr; gap: 32px; }
+    .shot { margin: 0 auto; }
+    .grid { grid-template-columns: 1fr; }
+    th { width: auto; white-space: normal; }
+    section { padding: 40px 0; }
+  }
+</style>
+</head>
+<body>
+<div class="silk" aria-hidden="true"></div>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <img class="logo" src="logonemuru.png" width="1334" height="428" alt="Nemuru">
+      <h1 class="tagline">Le son baisse.<br>Puis l'ordinateur s'endort.</h1>
+      <p class="lede">Nemuru est une minuterie de coucher pour Windows. On choisit une durée, le volume descend tout doucement, puis le PC passe en veille. La Google TV s'éteint avec lui.</p>
+      <div class="actions">
+        <a class="button primary" href="https://github.com/t12lve/nemuru/releases/latest">Télécharger pour Windows</a>
+        <a class="button secondary" href="https://github.com/t12lve/nemuru">Code source</a>
+      </div>
+      <p class="fine">Version 1.4.0 · Windows 10 et 11, 64 bits · Gratuit, licence MIT</p>
+    </div>
+    <img class="shot" src="fenetre.png" width="516" height="939" alt="La fenêtre de Nemuru : logo, compte de 45 minutes, durée, courbe, action de fin et bouton Commencer.">
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap progress">
+      <img src="logo-remplissage.gif" width="416" height="122" alt="Le logo Nemuru se remplit de lumière dorée de gauche à droite, puis scintille.">
+      <div>
+        <p class="eyebrow">Nouveau dans 1.4.0</p>
+        <h2>Le logo est la barre de progression</h2>
+        <p class="dim">Pendant le compte, une lumière de fin de journée gagne les lettres de gauche à droite. Un liseré clair marque le front. Quand le logo est plein, l'heure est venue.</p>
+        <p class="dim">Au repos, il reste éclairé : ambre, or, pêche et rose glissent lentement, un reflet le traverse, les étoiles scintillent.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">En trois gestes</p>
+      <h2>Simple au moment où l'on a sommeil</h2>
+      <ol class="steps">
+        <li><h3>Une durée</h3><p class="dim">15, 30, 45, 60 ou 90 minutes, ou n'importe quelle valeur jusqu'à 480. Sur un clavier AZERTY, la rangée du haut tape des chiffres même sans Maj.</p></li>
+        <li><h3>Une façon de baisser</h3><p class="dim">Quatre courbes. Par défaut, le volume tient puis descend sur la fin.</p></li>
+        <li><h3>Commencer</h3><p class="dim">La fenêtre se range près de l'horloge. Son icône montre le temps restant au survol et permet d'annuler.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Le volume</p>
+      <h2>Une baisse que l'on n'entend pas venir</h2>
+      <table>
+        <tr><th>Sur la fin</th><td>Le niveau du moment tient, puis descend pendant les dernières minutes. Réglage de départ.</td></tr>
+        <tr><th>À l'oreille</th><td>Une descente régulière pour l'oreille : linéaire en décibels, de 0 à −60 dB.</td></tr>
+        <tr><th>Linéaire</th><td>Le pourcentage descend d'un pas égal chaque minute.</td></tr>
+        <tr><th>En douceur</th><td>Lente au début, plus rapide au milieu, lente à la fin.</td></tr>
+      </table>
+      <p class="dim" style="margin-top:20px">Le curseur de volume de Windows reste libre pendant le compte. Si vous montez ou baissez le son, Nemuru reprend la descente à partir de ce nouveau niveau, en pourcentage.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">À la fin</p>
+      <h2>Veille, hibernation, écran éteint ou arrêt</h2>
+      <div class="grid">
+        <div class="cell"><h3>Veille</h3><p>Le volume de départ revient au réveil.</p></div>
+        <div class="cell"><h3>Hibernation</h3><p>Même chose, à la sortie d'hibernation.</p></div>
+        <div class="cell"><h3>Écran éteint</h3><p>Le son reste coupé jusqu'à « Rétablir le son ».</p></div>
+        <div class="cell"><h3>Arrêt</h3><p>L'ordinateur s'éteint complètement.</p></div>
+        <div class="cell"><h3>Rien ne l'interrompt</h3><p>Windows ne s'endort pas de lui-même pendant le compte.</p></div>
+        <div class="cell"><h3>Toujours réversible</h3><p><kbd>Échap</kbd> annule et remet le volume de départ.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap duo tv">
+      <div>
+        <p class="eyebrow">Google TV</p>
+        <h2>La télé s'éteint aussi</h2>
+        <p class="dim"><strong style="color:var(--ink)">Chercher</strong> trouve les appareils Cast du réseau, une ligne par appareil. <strong style="color:var(--ink)">Appairer</strong> affiche un code QR : le téléphone ouvre une petite page servie par Nemuru sur le réseau de la maison et y saisit le code que la télé affiche.</p>
+        <p class="dim">Ce code ne passe jamais par Internet, ni par ce site. Une fois appairée, la télé reçoit la touche d'alimentation de la télécommande environ trente secondes avant la fin. <strong style="color:var(--ink)">Allumer</strong> la réveille.</p>
+      </div>
+      <img src="tele.png" width="516" height="939" alt="La section Google TV : adresse, Chercher, Appairer, Allumer et Éteindre.">
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Discret</p>
+      <h2>Pas de compte, pas de suivi</h2>
+      <div class="grid">
+        <div class="cell"><h3>Mises à jour</h3><p>Au lancement, Nemuru regarde la dernière version sur GitHub et s'installe tout seul quand aucun compte ne tourne.</p></div>
+        <div class="cell"><h3>Chez vous</h3><p>Réglages, certificats et journal restent dans <code>%APPDATA%\Nemuru</code>.</p></div>
+        <div class="cell"><h3>Léger</h3><p>Un seul exécutable en Rust, une seule instance à la fois, environ 10 % d'un cœur quand la fenêtre est visible.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Nemuru · licence MIT</span>
+    <span><a href="https://github.com/t12lve/nemuru">GitHub</a> · <a href="https://github.com/t12lve/nemuru/releases">Versions</a> · <a href="https://github.com/t12lve/nemuru#readme">Mode d'emploi</a></span>
+  </div>
+</footer>
+</body>
+</html>

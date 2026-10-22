@@ -12,10 +12,10 @@ pub enum FadeCurve {
 
 impl FadeCurve {
     pub const ALL: [FadeCurve; 4] = [
+        FadeCurve::LateFade,
         FadeCurve::Logarithmic,
         FadeCurve::Linear,
         FadeCurve::Sigmoid,
-        FadeCurve::LateFade,
     ];
 
     pub fn label(self) -> &'static str {
@@ -32,7 +32,7 @@ impl FadeCurve {
             FadeCurve::Linear => "Le niveau descend d'un pas égal chaque minute.",
             FadeCurve::Logarithmic => "La baisse semble régulière à l'oreille.",
             FadeCurve::Sigmoid => "La baisse commence et finit lentement.",
-            FadeCurve::LateFade => "Le volume tient, puis descend à la fin.",
+            FadeCurve::LateFade => "Le volume du moment tient, puis descend à la fin.",
         }
     }
 }
@@ -74,6 +74,21 @@ pub fn volume_factor(progress: f32, curve: FadeCurve, late_fraction: f32) -> f32
         }
     };
     factor.clamp(0.0, 1.0)
+}
+
+/// Si le volume observé s'éloigne de la dernière écriture, ce niveau devient
+/// la nouvelle base. Le facteur de la courbe reste un pourcentage de cette base.
+pub fn adopted_anchor(anchor: f32, last_written: f32, observed: f32, applied_factor: f32) -> f32 {
+    let anchor = anchor.clamp(0.0, 1.0);
+    let observed = observed.clamp(0.0, 1.0);
+    if (observed - last_written).abs() <= 0.015 {
+        return anchor;
+    }
+    if applied_factor > 0.05 {
+        (observed / applied_factor).clamp(0.0, 1.0)
+    } else {
+        observed
+    }
 }
 
 #[cfg(test)]
@@ -125,5 +140,29 @@ mod tests {
         let fraction = late_fraction(45.0 * 60.0, 10);
         assert!((fraction - (10.0 / 45.0)).abs() < 1e-4);
         assert_eq!(late_fraction(30.0, 10), 1.0);
+    }
+
+    #[test]
+    fn a_small_readback_keeps_the_anchor() {
+        let anchor = adopted_anchor(0.40, 0.40, 0.405, 1.0);
+        assert!((anchor - 0.40).abs() < 1e-4);
+    }
+
+    #[test]
+    fn a_slider_move_becomes_the_new_base() {
+        let anchor = adopted_anchor(0.80, 0.80, 0.40, 1.0);
+        assert!((anchor - 0.40).abs() < 1e-4);
+    }
+
+    #[test]
+    fn a_move_during_the_fade_keeps_the_percentage() {
+        let anchor = adopted_anchor(0.80, 0.40, 0.20, 0.50);
+        assert!((anchor - 0.40).abs() < 1e-3);
+    }
+
+    #[test]
+    fn a_move_at_the_floor_is_taken_as_is() {
+        let anchor = adopted_anchor(0.80, 0.02, 0.30, 0.02);
+        assert!((anchor - 0.30).abs() < 1e-4);
     }
 }

@@ -25,7 +25,7 @@ impl Default for AppConfig {
     fn default() -> Self {
         Self {
             duration_minutes: 45,
-            fade_curve: FadeCurve::Logarithmic,
+            fade_curve: FadeCurve::LateFade,
             sleep_action: SleepAction::Sleep,
             google_tv_enabled: false,
             google_tv_ip: String::new(),

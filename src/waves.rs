@@ -50,10 +50,15 @@ struct Sample {
 }
 
 fn shade(x: f32, y: f32, center: egui::Pos2, reach: f32, time: f32) -> Sample {
-    let h = height(x, y, time);
-    let step = 8.0;
-    let hx = (height(x + step, y, time) - height(x - step, y, time)) / (2.0 * step);
-    let hy = (height(x, y + step, time) - height(x, y - step, time)) / (2.0 * step);
+    // Les coins s'effacent : inutile d'y calculer la soie.
+    let dx = (x - center.x) / reach;
+    let dy = (y - center.y) / reach;
+    let fade = 1.0 - smoothstep(0.5, 1.18, (dx * dx + dy * dy).sqrt());
+    if fade * 0.5 <= 0.04 {
+        return Sample { radius: 0.0, alpha: 0.0 };
+    }
+
+    let (h, hx, hy) = surface(x, y, time);
     let gx = hx * UNIT * 0.95 * 0.4;
     let gy = hy * UNIT * 0.95 * 0.4;
     let len = (gx * gx + gy * gy + 1.0).sqrt();
@@ -67,36 +72,69 @@ fn shade(x: f32, y: f32, center: egui::Pos2, reach: f32, time: f32) -> Sample {
     let hy_l = light[1];
     let hz_l = light[2] + 1.0;
     let hlen = (hx_l * hx_l + hy_l * hy_l + hz_l * hz_l).sqrt();
-    let spec = (nx * hx_l / hlen + ny * hy_l / hlen + nz * hz_l / hlen)
-        .clamp(0.0, 1.0)
-        .powf(160.0)
-        * 0.92;
+    let spec = pow160((nx * hx_l / hlen + ny * hy_l / hlen + nz * hz_l / hlen).clamp(0.0, 1.0)) * 0.92;
     let hollow = 0.7 + 0.3 * (h * 0.5 + 0.5).clamp(0.0, 1.0);
     let mut tone = (diffuse * hollow * 0.78 + spec).clamp(0.0, 1.0);
     tone = ((tone - 0.42) * 1.2 + 0.42).clamp(0.0, 1.0);
     let level = tone.powf(2.2);
 
-    let dx = (x - center.x) / reach;
-    let dy = (y - center.y) / reach;
-    let fade = 1.0 - smoothstep(0.5, 1.18, (dx * dx + dy * dy).sqrt());
     let alpha = fade * (0.22 + 0.78 * level) * 0.5;
     let radius = 0.5 * SPACING * MARK * level.sqrt().max(0.14);
 
     Sample { radius, alpha }
 }
 
-fn height(x: f32, y: f32, time: f32) -> f32 {
-    let px = (x) / UNIT;
+/// x^160 par élévations au carré, bien moins cher que `powf`.
+fn pow160(x: f32) -> f32 {
+    let x2 = x * x;
+    let x4 = x2 * x2;
+    let x8 = x4 * x4;
+    let x16 = x8 * x8;
+    let x32 = x16 * x16;
+    let x64 = x32 * x32;
+    let x128 = x64 * x64;
+    x128 * x32
+}
+
+/// Hauteur de la soie et sa pente exacte (d/dx, d/dy), en une seule évaluation.
+/// Avant, la pente venait de quatre hauteurs voisines : cinq fois plus de sinus.
+fn surface(x: f32, y: f32, time: f32) -> (f32, f32, f32) {
+    let px = x / UNIT;
     let py = y / UNIT;
-    let heading = (0.9396926_f32, 0.34202015_f32);
-    let u = px * heading.0 + py * heading.1;
-    let v = px * -heading.1 + py * heading.0;
-    let bend = (v * 1.6 + time * 0.2).sin() * 0.4 + (v * 0.85 + time * 0.15).sin() * 0.85;
+    let (a, b) = (0.9396926_f32, 0.34202015_f32);
+    let u = px * a + py * b;
+    let v = px * -b + py * a;
+
+    let (b1s, b1c) = (v * 1.6 + time * 0.2).sin_cos();
+    let (b2s, b2c) = (v * 0.85 + time * 0.15).sin_cos();
+    let bend = b1s * 0.4 + b2s * 0.85;
+    let bend_v = 0.4 * 1.6 * b1c + 0.85 * 0.85 * b2c;
+
     let phase = u * FOLDS + bend - time * 0.45;
-    let swell = 0.6 + 0.4 * (u * 0.55 + v * 0.45 + time * 0.12).sin();
-    let fold = phase.sin() + 0.32 * (phase * 2.0 + 1.3).sin();
-    let ripple = 0.16 * (u * FOLDS * 2.5 + bend * 1.9 - time * 0.9 + 2.1).sin();
-    (fold + ripple) * swell
+    let (ss, sc) = (u * 0.55 + v * 0.45 + time * 0.12).sin_cos();
+    let swell = 0.6 + 0.4 * ss;
+    let (swell_u, swell_v) = (0.4 * 0.55 * sc, 0.4 * 0.45 * sc);
+
+    let (p1s, p1c) = phase.sin_cos();
+    let (p2s, p2c) = (phase * 2.0 + 1.3).sin_cos();
+    let fold = p1s + 0.32 * p2s;
+    let fold_phase = p1c + 0.64 * p2c;
+
+    let (rs, rc) = (u * FOLDS * 2.5 + bend * 1.9 - time * 0.9 + 2.1).sin_cos();
+    let ripple = 0.16 * rs;
+    let (ripple_u, ripple_v) = (0.16 * rc * FOLDS * 2.5, 0.16 * rc * 1.9 * bend_v);
+
+    let wave = fold + ripple;
+    let h_u = (fold_phase * FOLDS + ripple_u) * swell + wave * swell_u;
+    let h_v = (fold_phase * bend_v + ripple_v) * swell + wave * swell_v;
+    let h_x = (h_u * a - h_v * b) / UNIT;
+    let h_y = (h_u * b + h_v * a) / UNIT;
+    (wave * swell, h_x, h_y)
+}
+
+#[cfg(test)]
+fn height(x: f32, y: f32, time: f32) -> f32 {
+    surface(x, y, time).0
 }
 
 fn smoothstep(edge0: f32, edge1: f32, value: f32) -> f32 {
@@ -115,7 +153,27 @@ fn mix(from: [u8; 3], to: [u8; 3], t: f32) -> egui::Color32 {
 
 #[cfg(test)]
 mod tests {
-    use super::height;
+    use super::{height, pow160, surface};
+
+    #[test]
+    fn exact_slope_matches_the_old_neighbour_estimate() {
+        let step = 8.0;
+        for &(x, y, t) in &[(40.0, 80.0, 0.0), (310.0, 620.0, 3.7), (900.0, 15.0, 12.4), (5.0, 1400.0, 40.0)] {
+            let (_, hx, hy) = surface(x, y, t);
+            let fx = (height(x + step, y, t) - height(x - step, y, t)) / (2.0 * step);
+            let fy = (height(x, y + step, t) - height(x, y - step, t)) / (2.0 * step);
+            let scale = fx.abs().max(fy.abs()).max(1e-3);
+            assert!((hx - fx).abs() / scale < 0.03, "x={x} y={y} t={t}: {hx} vs {fx}");
+            assert!((hy - fy).abs() / scale < 0.03, "x={x} y={y} t={t}: {hy} vs {fy}");
+        }
+    }
+
+    #[test]
+    fn pow160_matches_powf() {
+        for &x in &[0.0_f32, 0.5, 0.97, 0.995, 1.0] {
+            assert!((pow160(x) - x.powf(160.0)).abs() < 1e-4, "x={x}");
+        }
+    }
 
     #[test]
     fn silk_moves_and_stays_finite() {

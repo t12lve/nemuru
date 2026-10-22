@@ -36,7 +36,7 @@ if exist "%INNO_PATH%" (
         echo.
         echo ========================================================
         echo   SUCCES ! Installeur disponible dans :
-        echo   dist-installer\Nemuru_Setup_v1.3.0.exe
+        echo   dist-installer\Nemuru_Setup_v1.4.0.exe
         echo ========================================================
     )
 ) else (

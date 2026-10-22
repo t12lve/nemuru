@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 667 214">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#Dégradé_sans_nom_21-6);
+      }
+
+      .cls-2 {
+        mix-blend-mode: multiply;
+        opacity: .7;
+      }
+
+      .cls-3 {
+        filter: url(#drop-shadow-9);
+      }
+
+      .cls-4 {
+        filter: url(#drop-shadow-2);
+      }
+
+      .cls-5 {
+        filter: url(#drop-shadow-6);
+      }
+
+      .cls-6 {
+        filter: url(#drop-shadow-5);
+      }
+
+      .cls-7 {
+        fill: #ffe7ae;
+      }
+
+      .cls-8 {
+        filter: url(#drop-shadow-8);
+      }
+
+      .cls-9 {
+        filter: url(#drop-shadow-4);
+      }
+
+      .cls-10 {
+        filter: url(#drop-shadow-7);
+      }
+
+      .cls-11 {
+        filter: url(#drop-shadow-1);
+      }
+
+      .cls-12 {
+        fill: url(#Dégradé_sans_nom_21-4);
+      }
+
+      .cls-13 {
+        isolation: isolate;
+      }
+
+      .cls-14 {
+        fill: url(#Dégradé_sans_nom_21-3);
+      }
+
+      .cls-15 {
+        fill: url(#Dégradé_sans_nom_21-2);
+      }
+
+      .cls-16 {
+        fill: url(#Dégradé_sans_nom_21);
+      }
+
+      .cls-17 {
+        filter: url(#drop-shadow-3);
+      }
+
+      .cls-18 {
+        fill: url(#Dégradé_sans_nom_21-5);
+      }
+    </style>
+    <filter id="drop-shadow-1" x="464" y="97" width="92" height="116" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="2"/>
+      <feGaussianBlur result="blur" stdDeviation="5"/>
+      <feFlood flood-color="#0b0a0d" flood-opacity=".7"/>
+      <feComposite in2="blur" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="Dégradé_sans_nom_21" data-name="Dégradé sans nom 21" x1="510.02" y1="195.5" x2="510.02" y2="110.3" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f6b53f"/>
+      <stop offset=".5" stop-color="#fcd580"/>
+      <stop offset="1" stop-color="#fff2cc"/>
+    </linearGradient>
+    <filter id="drop-shadow-2" x="0" y="76" width="132" height="137" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="2"/>
+      <feGaussianBlur result="blur-2" stdDeviation="5"/>
+      <feFlood flood-color="#0b0a0d" flood-opacity=".7"/>
+      <feComposite in2="blur-2" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="Dégradé_sans_nom_21-2" data-name="Dégradé sans nom 21" x1="65.93" x2="65.93" y2="89.3" xlink:href="#Dégradé_sans_nom_21"/>
+    <filter id="drop-shadow-3" x="112" y="96" width="117" height="118" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="2"/>
+      <feGaussianBlur result="blur-3" stdDeviation="5"/>
+      <feFlood flood-color="#0b0a0d" flood-opacity=".7"/>
+      <feComposite in2="blur-3" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="Dégradé_sans_nom_21-3" data-name="Dégradé sans nom 21" x1="170.55" y1="196.55" x2="170.55" y2="109.85" xlink:href="#Dégradé_sans_nom_21"/>
+    <filter id="drop-shadow-4" x="209" y="97" width="178" height="116" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="2"/>
+      <feGaussianBlur result="blur-4" stdDeviation="5"/>
+      <feFlood flood-color="#0b0a0d" flood-opacity=".7"/>
+      <feComposite in2="blur-4" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="Dégradé_sans_nom_21-4" data-name="Dégradé sans nom 21" x1="297.75" x2="297.75" xlink:href="#Dégradé_sans_nom_21"/>
+    <filter id="drop-shadow-5" x="384" y="100" width="75" height="75" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="2"/>
+      <feGaussianBlur result="blur-5" stdDeviation="5"/>
+      <feFlood flood-color="#0b0a0d" flood-opacity=".7"/>
+      <feComposite in2="blur-5" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="drop-shadow-6" x="563" y="107" width="61" height="61" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="2"/>
+      <feGaussianBlur result="blur-6" stdDeviation="5"/>
+      <feFlood flood-color="#0b0a0d" flood-opacity=".7"/>
+      <feComposite in2="blur-6" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="drop-shadow-7" x="618" y="51" width="49" height="49" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="2"/>
+      <feGaussianBlur result="blur-7" stdDeviation="5"/>
+      <feFlood flood-color="#0b0a0d" flood-opacity=".7"/>
+      <feComposite in2="blur-7" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="drop-shadow-8" x="364" y="115" width="115" height="98" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="2"/>
+      <feGaussianBlur result="blur-8" stdDeviation="5"/>
+      <feFlood flood-color="#0b0a0d" flood-opacity=".7"/>
+      <feComposite in2="blur-8" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="Dégradé_sans_nom_21-5" data-name="Dégradé sans nom 21" x1="421.5" x2="421.5" y2="128.31" xlink:href="#Dégradé_sans_nom_21"/>
+    <filter id="drop-shadow-9" x="536" y="115" width="115" height="98" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="2"/>
+      <feGaussianBlur result="blur-9" stdDeviation="5"/>
+      <feFlood flood-color="#0b0a0d" flood-opacity=".7"/>
+      <feComposite in2="blur-9" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="Dégradé_sans_nom_21-6" data-name="Dégradé sans nom 21" x1="593.5" x2="593.5" y2="128.31" xlink:href="#Dégradé_sans_nom_21"/>
+  </defs>
+  <g class="cls-13">
+    <g id="Calque_1" data-name="Calque 1">
+      <g>
+        <g class="cls-11">
+          <path class="cls-16" d="M512.8,126.5v-15.6h-33.3v84.6h33.3v-34.65q0-8.4,4.42-11.7t13.88-3.3h9.45v-35.55q-7.95,0-15.3,4.43Q517.9,119.15,512.8,126.5Z"/>
+        </g>
+        <g class="cls-4">
+          <polygon class="cls-15" points="83.55 143.6 48.3 89.3 15 89.3 15 195.5 48.3 195.5 48.3 142.1 83.55 195.5 116.85 195.5 116.85 89.3 83.55 89.3 83.55 143.6"/>
+        </g>
+        <g class="cls-17">
+          <path class="cls-14" d="M192.98,115.02q-9.83-5.17-22.43-5.17t-22.42,5.25-15.3,15.07-5.48,23.03,5.48,23.02,15.3,15.08,22.42,5.25q10.5,0,19.28-4.13,8.77-4.12,14.54-11.25,5.78-7.12,7.58-16.12h-35.25q-2.4,4.95-7.8,4.95-8.4,0-9.15-10.95h53.55q.45-3.15.45-6.6,0-13.05-5.48-22.65Q202.8,120.2,192.98,115.02ZM160.2,144.5q1.5-8.55,10.35-8.55,4.05,0,6.75,2.18,2.7,2.17,2.7,6.37H160.2Z"/>
+        </g>
+        <g class="cls-9">
+          <path class="cls-12" d="M337.2,110.3q-8.7,0-15.9,4.28t-11.85,10.87q-4.2-7.2-11.25-11.18-7.05-3.97-16.2-3.97-8.4,0-14.62,3.3-6.23,3.3-9.83,8.7v-11.4h-33.3v84.6h33.3v-44.85q0-5.4,3.15-8.48,3.15-3.07,8.7-3.07,5.4,0,8.62,3.07,3.23,3.08,3.23,8.48v44.85h33.15v-44.85q0-5.4,3.15-8.48,3.15-3.07,8.7-3.07,5.4,0,8.63,3.07,3.22,3.08,3.22,8.48v44.85h33.15v-49.05q0-16.65-8.92-26.4Q353.4,110.3,337.2,110.3Z"/>
+        </g>
+      </g>
+      <g class="cls-6">
+        <polygon id="Etoile_u_1" data-name="Etoile u 1" class="cls-7" points="421.5 113.5 425.04 131.96 443.5 135.5 425.04 139.04 421.5 157.5 417.96 139.04 399.5 135.5 417.96 131.96 421.5 113.5"/>
+      </g>
+      <g class="cls-5">
+        <polygon id="Etoile_u_2" data-name="Etoile u 2" class="cls-7" points="593.5 120.5 595.97 133.03 608.5 135.5 595.97 137.97 593.5 150.5 591.03 137.97 578.5 135.5 591.03 133.03 593.5 120.5"/>
+      </g>
+      <g id="Etoile_haut" data-name="Etoile haut">
+        <image class="cls-2" width="58" height="58" transform="translate(148 21)" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAAACXBIWXMAAAsSAAALEgHS3X78AAAE/klEQVRoge2abXObQAyE13EcN07y/39omzY2fumHsmZZpOMAu9NmohkN+AXM49VJugPgy77sv7TVvX/gZfdW9RvvP79f7nkddwFN4LLfGgDeA/qmoAaY7btdkv2bAt8MVCCjbQ2obq+At4JdDBqoqO7vuTmc+vXzW8Cul57gabN1uBWAB/G1+INs6aN/ytNmu2qaw6LrXKSohSsBHTQCAjrlzrJVHyi8RNnHuQcmkJGS/j5N4U6y5XnP8r3FNkvRAJKgGqaPts1ATwCOtqW7urNVnTxGKyAfAWxaf0p8g+4PWCNPVgObO14ngQYlxENVIbfi31rfog8bgUblpmdzYKtBE8gVYiUV8Ll1h31Ep6qfO2siLvzOVNgq0AKkK0m1FJC+Qx+U4atZmTBeT0ObAjuadSshFdSVfEZfxYcW4AigQRfCGajDnmX/wusbS1JFRUfqJEPWw5Xq7QC8mDOEt4gVjToloKLEjKmbKppk1wzSlVTIHTpVNwJ0BHAQWAd186zM8qSvU0sVTVq7rIRQyWcBfBXPFGV9jSA8bLmflqGSqiGoqanZ9QH5mGS4vpq/oa+uJqMIdLS8lCyDHYRuoSGIMmwWrg5JwE17njP+hG6WiNyiPln3s89y0ABSQSM1PfkoJMNWQXWMRqAK7BedzV17333Zva08C4+VF1eTCaikZuQE1fLSyGsF0RmN+znYnuWc+if0rAdamERHNVNbuzHYZ3TjkoqyvKiaPlVzP9lWm/6VbXPQADBSdKw5ILS3flHDQDV9yhb5EfEsh2Oe1ztpjDp01rjrjMSbd261kVdQheTFN+IHcR7P93XaF858fJyWQKMwztRV19mJOy9Qx9MpOU73dQKQQRaneddEkCxVRus50XKJrwuVVhj0c//eOnEHcxWz/SHoHWx09vE37QpqdSdaY41SvGbBGo8yZ/ZZaUklaw99/2qlMeoHe2ZkFowSSGPO8AO6zHhqPzvKsU1yvGbccC0pA6wBLQHqRezxJ3F8oJ94fE0I6MoBQQ/t8fQP8z362bcZgb1aTWcUhaqGkyqwR5cRFcyTCM+n5eUkcL9a/ynO9witSlPdKKRD681emuag0zNgmOU060YZsJQZdVwzEvYC+A7gR7vlvkI7sIazzk0vZFGrCV12HQy7JgHN4IH+bEU7o0MLoZDcqroaxq6o98ahZaCeiAh7TEDUohU9hjybBoJSUVXRYammgkbj9GrR+tFg4i3hm124m580+j5hNWw5Nhm2BNSQVTX3GIZsWHKiiXe4whCMVV4sS0M2+EtLIg66N0h6aVxGalbdsqgZo2qn4L0aUJYSjlGgG6Mf6AMrqJaXSMle2JaWPNPFsSCEp1iWbVmaasoKVY8gw5JSWu4srusGsNnShsL5972sUCGGJUF/oQ8ZlZEUctECNrBYWQXVllFrKMdilF1Lbd91TNbclqi699I0h7nAqiYVpaqEilq+KiWn3CuddNuwAJv9AT7T0fbR+1zvaY+44W3+yTeCC3XWzcenTwgOGMJVzVTm3PWeO/a4IjG2iOaNvtbm6E/QLT/rlZG5t/ZnP6whF0s7B5+dka/xRIqrgidMzKwlm/2cUWVy8qmeQ2UPZ1S3drU2O3RpI7cXfV9/00F8FrIo+bgtBgVCWN332U7pPos3AjeB1B9dbJ/+oUe1mY+xAskC1z/5GKvap38wObJ/5VHzL/uy/9R+AwdIgexQhzmUAAAAAElFTkSuQmCC"/>
+        <image width="97" height="97" transform="translate(129)" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGEAAABhCAYAAADGBs+jAAAACXBIWXMAAAsSAAALEgHS3X78AAADQklEQVR4nO3awWrcVhTG8f+5V57a4BnvugojCHgzdf0IpRu/Qd0XSB/ED5K8gJ1uu/GioS+QjTMbQ0Ci2XdmAnYdXZ0upHpi00DqQEfX/X4gEDM2XPTpnHMlBkRERERERERERERERERERERERERERERERETky9mmF/BQ7hh4v35zM3yzK3q4LENwx3h7OmEUSgBu2oqnPy5zDSJsegEP48ZuKNkqnrFVPGM3lOuqyE+x6QU8zJmRignWHgDQhgmcZRtCppUwN1ITge5ITYS5QvivuGPU+2NinOI2wW1CjFPq/XE3rPOTXQjgxvbOFAtHmJfdEY7Y3pnmOhcynAlnRirGBLpKADCmJMa5zoUMKwEgGU7o7nzvz1OWAUCWIcyN5OFu6/H+szyH86Db0fqpuG8zr+bGu8M9ok9xxlgfhFs3qN8dXvivJwu+n/UPbceew9P0oO6cOxf91dx4uj9me6fv98koRoY3Ja39gPMdZnv9Py4wfiP4S6yoaG4cohNZcX1V8/Zy1QUzzFAGE8Ltq4jdr0pSmlDEQNN0Ox9vSyz83f/HQImxx3r9jrMAKowVmOOtY6HC23OKoqJJLTEuef/n4F5xDKgduTH6uaRtf8L4hpQiMAEvCTbB+9ZjbhDs3nbUuqpovwVzcAjmuB8AB6S0xEi07RtG4Tn4Rfd3w5DhYH58BlQJ5tycVoy2nt9pR9gR7cftyMbg/9COfAG2bkdt347wc2Ls21FYcvOhGlIVwIBmAvx/B/OAKgG6i7O+S935A3yx3qK+NvYP3xAcsLKbAQBW4f6SD/YLl6/7LWrD7UUvh3XR7xtUCPfdDwXA/WTB77OaoljdfmesaFLNk/nCnpw0G1nsF8hwMM+caO3dcKz/bDboO/5TMgwBIDpGH4T15zHLACDLEI67gevU4EvwJU5NZNXNgPxkGII511c13p7jVnVHe871VT20refnyi4EM5zp5YqUasyXmC9JqWZ6uRra1vNzDXp39GkzJxYJSADdeZ5DGTKshM6xE9slFi6wcEFsl7nOA8i2Esx5f1oxal4A3Y+/vs5zHsDAXlv8G4/pZ5AiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIo/EX/B9dkEUkhCxAAAAAElFTkSuQmCC"/>
+      </g>
+      <g class="cls-10">
+        <polygon id="Etoile_droite" data-name="Etoile droite" class="cls-7" points="642.5 64.5 644.27 71.73 651.5 73.5 644.27 75.27 642.5 82.5 640.73 75.27 633.5 73.5 640.73 71.73 642.5 64.5"/>
+      </g>
+      <g class="cls-8">
+        <path class="cls-18" d="M455.11,128.31c.25,1.69.39,3.42.39,5.19,0,18.78-15.22,34-34,34s-34-15.22-34-34c0-1.77.14-3.5.39-5.19-5.27,7.01-8.39,15.74-8.39,25.19,0,23.2,18.8,42,42,42s42-18.8,42-42C463.5,144.05,460.38,135.32,455.11,128.31Z"/>
+      </g>
+      <g class="cls-3">
+        <path class="cls-1" d="M627.11,128.31c.25,1.69.39,3.42.39,5.19,0,18.78-15.22,34-34,34s-34-15.22-34-34c0-1.77.14-3.5.39-5.19-5.27,7.01-8.39,15.74-8.39,25.19,0,23.2,18.8,42,42,42s42-18.8,42-42C635.5,144.05,632.38,135.32,627.11,128.31Z"/>
+      </g>
+    </g>
+  </g>
+</svg>

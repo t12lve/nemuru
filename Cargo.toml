@@ -1,6 +1,6 @@
 [package]
 name = "nemuru"
-version = "1.3.0"
+version = "1.4.0"
 edition = "2021"
 authors = ["Nemuru"]
 description = "Baisse le volume de Windows, puis met l'ordinateur en veille"
@@ -57,6 +57,9 @@ rand = "0.8"
 sha2 = "0.10"
 x509-parser = "0.16"
 p12 = "0.6"
+qrcode = "0.14"
+# Logo en tête de fenêtre (déjà compilé par eframe, PNG seulement)
+image = { version = "0.25", default-features = false, features = ["png"] }
 
 [build-dependencies]
 # Embeds Windows application icon and manifest (dpiAware, admin/normal execution)

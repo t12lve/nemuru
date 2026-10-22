@@ -56,6 +56,10 @@ impl PairSession {
         let _ = self.code_tx.send(code.trim().to_string());
     }
 
+    pub fn key_sender(&self) -> Sender<String> {
+        self.code_tx.clone()
+    }
+
     pub fn poll(&self) -> Option<PairEvent> {
         self.events.try_recv().ok()
     }
@@ -264,7 +268,7 @@ fn pairing_thread(ip: String, code_rx: Receiver<String>, events: Sender<PairEven
             .send(PairEvent::WaitingForCode)
             .map_err(|_| anyhow!("fenêtre fermée"))?;
         let code = code_rx
-            .recv_timeout(Duration::from_secs(120))
+            .recv_timeout(Duration::from_secs(180))
             .map_err(|_| anyhow!("le code n'est pas arrivé"))?;
         let secret = pairing_secret(&server_der, &code)?;
         write_frame(&mut stream, &secret)?;

@@ -315,7 +315,9 @@ fn countdown(
     shared: &Arc<Mutex<Shared>>,
 ) -> (Outcome, Option<String>) {
     let started = Instant::now();
-    let initial = saved.map(|s| s.volume).unwrap_or(1.0);
+    let mut anchor = saved.map(|s| s.volume).unwrap_or(1.0);
+    let mut last_written = anchor;
+    let mut applied = 1.0;
     let mut tv: Option<JoinHandle<Result<(), String>>> = None;
     loop {
         if cancel.load(Ordering::SeqCst) {
@@ -338,9 +340,17 @@ fn countdown(
             return (Outcome::Finished, join_tv(tv));
         }
         let progress = elapsed.as_secs_f32() / total.as_secs_f32();
-        let target = initial * fade::volume_factor(progress, config.fade_curve, late);
+        let factor = fade::volume_factor(progress, config.fade_curve, late);
+        if let Some(audio) = audio {
+            if let Ok(observed) = audio.get_volume() {
+                anchor = fade::adopted_anchor(anchor, last_written, observed, applied);
+            }
+        }
+        let target = (anchor * factor).clamp(0.0, 1.0);
         if let Some(audio) = audio {
             let _ = audio.set_volume(target);
+            last_written = target;
+            applied = factor;
         }
         let percent = if audio.is_some() {
             Some((target * 100.0).round().clamp(0.0, 100.0) as u8)

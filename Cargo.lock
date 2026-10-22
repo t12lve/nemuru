@@ -2742,17 +2742,19 @@ dependencies = [
 
 [[package]]
 name = "nemuru"
-version = "1.3.0"
+version = "1.4.0"
 dependencies = [
  "anyhow",
  "chrono",
  "dirs 5.0.1",
  "eframe",
  "env_logger",
+ "image",
  "log",
  "mdns-sd",
  "native-tls",
  "p12",
+ "qrcode",
  "rand",
  "rsa",
  "serde",
@@ -3598,6 +3600,15 @@ name = "pxfm"
 version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d55d956fa96f5ec02be2e13af0e20391a5aa83d6a074e3ad368959d0fab299ea"
+
+[[package]]
+name = "qrcode"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d68782463e408eb1e668cf6152704bd856c78c5b6417adaee3203d8f4c1fc9ec"
+dependencies = [
+ "image",
+]
 
 [[package]]
 name = "quick-error"
